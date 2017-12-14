@@ -1,4 +1,4 @@
-# VideoToFrames
+# VideoToFrames [![Build Status](https://travis-ci.org/zhantong/video-to-frames.svg?branch=master)](https://travis-ci.org/zhantong/video-to-frames)
 
 ## 特性
 
