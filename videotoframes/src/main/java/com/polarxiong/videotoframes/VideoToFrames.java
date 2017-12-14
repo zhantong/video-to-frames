@@ -28,7 +28,7 @@ public class VideoToFrames implements Runnable {
     private Callback callback;
 
     public interface Callback {
-        void onDecodeFrame(byte[] frame);
+        void onDecodeFrame(int index, Image image);
 
         void onFinishDecode();
     }
@@ -155,13 +155,8 @@ public class VideoToFrames implements Runnable {
                     outputFrameCount++;
 
                     Image image = decoder.getOutputImage(outputBufferId);
-                    //System.out.println("image format: " + image.getFormat());
-
-                    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                    byte[] arr = new byte[buffer.remaining()];
-                    buffer.get(arr);
                     if (callback != null) {
-                        callback.onDecodeFrame(arr);
+                        callback.onDecodeFrame(outputFrameCount, image);
                     }
                     image.close();
                     decoder.releaseOutputBuffer(outputBufferId, true);
