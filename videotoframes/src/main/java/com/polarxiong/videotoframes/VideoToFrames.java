@@ -2,6 +2,7 @@ package com.polarxiong.videotoframes;
 
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.media.Image;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
@@ -289,6 +290,35 @@ public class VideoToFrames implements Runnable {
             public void onDecodeFrame(int index, Image image) {
                 String outputFilePath = new File(outputDir, String.format("frame_%6d_NV21_%dx%d.yuv", index, image.getWidth(), image.getHeight())).getAbsolutePath();
                 dumpFile(outputFilePath, imageToYuv(image, COLOR_Format_NV21));
+            }
+
+            @Override
+            public void onFinishDecode() {
+
+            }
+        };
+        addCallback(callback);
+    }
+
+    private void compressToJpeg(String outputFilePath, Image image) {
+        FileOutputStream outStream;
+        try {
+            outStream = new FileOutputStream(outputFilePath);
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to create output file " + outputFilePath, ioe);
+        }
+        Rect rect = image.getCropRect();
+        YuvImage yuvImage = new YuvImage(imageToYuv(image, COLOR_Format_NV21), ImageFormat.NV21, rect.width(), rect.height(), null);
+        yuvImage.compressToJpeg(rect, 100, outStream);
+    }
+
+    public void saveJpegFrames(final String outputDir) {
+        new File(outputDir).mkdirs();
+        Callback callback = new Callback() {
+            @Override
+            public void onDecodeFrame(int index, Image image) {
+                String outputFilePath = new File(outputDir, String.format("frame_%6d_.jpg", index)).getAbsolutePath();
+                compressToJpeg(outputFilePath, image);
             }
 
             @Override
