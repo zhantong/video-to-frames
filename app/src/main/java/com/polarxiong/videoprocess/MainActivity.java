@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -49,8 +50,8 @@ public class MainActivity extends Activity {
                 VideoToFrames videoToFrames = new VideoToFrames(inputFilePath);
                 VideoToFrames.Callback callback = new VideoToFrames.Callback() {
                     @Override
-                    public void onDecodeFrame(byte[] frame) {
-                        System.out.println("test");
+                    public void onDecodeFrame(int index, Image image) {
+                        System.out.println("index: " + index);
                     }
 
                     @Override
@@ -58,7 +59,7 @@ public class MainActivity extends Activity {
                         System.out.println("finish");
                     }
                 };
-                videoToFrames.setCallback(callback);
+                videoToFrames.addCallback(callback);
                 try {
                     videoToFrames.start();
                 } catch (Throwable throwable) {

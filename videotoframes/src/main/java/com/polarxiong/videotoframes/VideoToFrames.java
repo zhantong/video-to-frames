@@ -10,6 +10,8 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by zhantong on 2017/12/13.
@@ -25,7 +27,7 @@ public class VideoToFrames implements Runnable {
     private Thread childThread;
     private Throwable throwable;
     private boolean stopDecode = false;
-    private Callback callback;
+    private List<Callback> callbackList = new ArrayList<>();
 
     public interface Callback {
         void onDecodeFrame(int index, Image image);
@@ -56,8 +58,8 @@ public class VideoToFrames implements Runnable {
         }
     }
 
-    public void setCallback(Callback callback) {
-        this.callback = callback;
+    public void addCallback(Callback callback) {
+        callbackList.add(callback);
     }
 
     public void videoDecode(String videoFilePath) throws IOException {
@@ -155,7 +157,7 @@ public class VideoToFrames implements Runnable {
                     outputFrameCount++;
 
                     Image image = decoder.getOutputImage(outputBufferId);
-                    if (callback != null) {
+                    for (Callback callback : callbackList) {
                         callback.onDecodeFrame(outputFrameCount, image);
                     }
                     image.close();
@@ -163,7 +165,7 @@ public class VideoToFrames implements Runnable {
                 }
             }
         }
-        if (callback != null) {
+        for (Callback callback : callbackList) {
             callback.onFinishDecode();
         }
     }
