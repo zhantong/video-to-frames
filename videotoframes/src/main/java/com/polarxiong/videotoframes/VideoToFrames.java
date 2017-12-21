@@ -271,7 +271,7 @@ public class VideoToFrames implements Runnable {
         Callback callback = new Callback() {
             @Override
             public void onDecodeFrame(int index, Image image) {
-                String outputFilePath = new File(outputDir, String.format("frame_%6d_I420_%dx%d.yuv", index, image.getWidth(), image.getHeight())).getAbsolutePath();
+                String outputFilePath = new File(outputDir, String.format("frame_%06d_I420_%dx%d.yuv", index, image.getWidth(), image.getHeight())).getAbsolutePath();
                 dumpFile(outputFilePath, imageToYuv(image, COLOR_Format_I420));
             }
 
@@ -288,7 +288,7 @@ public class VideoToFrames implements Runnable {
         Callback callback = new Callback() {
             @Override
             public void onDecodeFrame(int index, Image image) {
-                String outputFilePath = new File(outputDir, String.format("frame_%6d_NV21_%dx%d.yuv", index, image.getWidth(), image.getHeight())).getAbsolutePath();
+                String outputFilePath = new File(outputDir, String.format("frame_%06d_NV21_%dx%d.yuv", index, image.getWidth(), image.getHeight())).getAbsolutePath();
                 dumpFile(outputFilePath, imageToYuv(image, COLOR_Format_NV21));
             }
 
@@ -317,7 +317,7 @@ public class VideoToFrames implements Runnable {
         Callback callback = new Callback() {
             @Override
             public void onDecodeFrame(int index, Image image) {
-                String outputFilePath = new File(outputDir, String.format("frame_%6d_.jpg", index)).getAbsolutePath();
+                String outputFilePath = new File(outputDir, String.format("frame_%06d_.jpg", index)).getAbsolutePath();
                 compressToJpeg(outputFilePath, image);
             }
 
