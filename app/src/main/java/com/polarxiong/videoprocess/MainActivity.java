@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,6 +39,7 @@ public class MainActivity extends Activity {
             switch (msg.what) {
                 case WHAT_DEBUG_OUTPUT:
                     mTextViewDebugOutput.setText((String) msg.obj);
+                    break;
             }
         }
     };
@@ -64,7 +66,8 @@ public class MainActivity extends Activity {
         buttonFilePathInput.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFilePath(REQUEST_CODE_GET_FILE_PATH);
+                //getFilePath(REQUEST_CODE_GET_FILE_PATH);
+                MainActivityPermissionsDispatcher.getFilePathWithPermissionCheck(MainActivity.this, REQUEST_CODE_GET_FILE_PATH);
             }
         });
         Button buttonSaveNv21 = findViewById(R.id.button_save_nv21);
@@ -157,6 +160,12 @@ public class MainActivity extends Activity {
                     .setPositiveButton("确定", null)
                     .show();
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
     private String getRealPathFromURI(Uri contentURI) {
