@@ -33,10 +33,75 @@
             android:text="选择视频文件" />
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/button_start"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="开始" />
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/text_view_output_directory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="输出文件夹名" />
+
+        <EditText
+            android:id="@+id/output_directory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_view_output_directory" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/text_view_debug_output"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="调试输出信息" />
+
+        <TextView
+            android:id="@+id/debug_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_view_debug_output"
+            android:lines="2" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_save_nv21"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="保存为NV21帧" />
+
+            <Button
+                android:id="@+id/button_save_i420"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="保存为I420帧" />
+
+            <Button
+                android:id="@+id/button_save_jpeg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="保存为JPEG帧" />
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </LinearLayout>

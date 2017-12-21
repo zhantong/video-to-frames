@@ -8,12 +8,18 @@ import android.database.Cursor;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.polarxiong.videotoframes.VideoToFrames;
+
+import java.io.File;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
@@ -22,10 +28,37 @@ import permissions.dispatcher.RuntimePermissions;
 public class MainActivity extends Activity {
     private static final int REQUEST_CODE_GET_FILE_PATH = 1;
 
+    private static final int WHAT_DEBUG_OUTPUT = 1;
+
+    private TextView mTextViewDebugOutput;
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case WHAT_DEBUG_OUTPUT:
+                    mTextViewDebugOutput.setText((String) msg.obj);
+            }
+        }
+    };
+    private VideoToFrames.Callback mCallbackSaveFrames = new VideoToFrames.Callback() {
+        @Override
+        public void onDecodeFrame(int index, Image image) {
+            mHandler.sendMessage(mHandler.obtainMessage(WHAT_DEBUG_OUTPUT, String.format("保存第%d帧...", index)));
+        }
+
+        @Override
+        public void onFinishDecode() {
+            mHandler.sendMessage(mHandler.obtainMessage(WHAT_DEBUG_OUTPUT, "完成！"));
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mTextViewDebugOutput = findViewById(R.id.debug_output);
 
         final Button buttonFilePathInput = findViewById(R.id.button_file_path_input);
         buttonFilePathInput.setOnClickListener(new View.OnClickListener() {
@@ -34,35 +67,67 @@ public class MainActivity extends Activity {
                 getFilePath(REQUEST_CODE_GET_FILE_PATH);
             }
         });
-
-        final Button buttonStart = findViewById(R.id.button_start);
-        buttonStart.setOnClickListener(new View.OnClickListener() {
+        Button buttonSaveNv21 = findViewById(R.id.button_save_nv21);
+        buttonSaveNv21.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText editTextInputFilePath = findViewById(R.id.file_path_input);
-                String inputFilePath = editTextInputFilePath.getText().toString();
-                VideoToFrames videoToFrames = new VideoToFrames(inputFilePath);
-                VideoToFrames.Callback callback = new VideoToFrames.Callback() {
-                    @Override
-                    public void onDecodeFrame(int index, Image image) {
-                        System.out.println("index: " + index);
-                    }
-
-                    @Override
-                    public void onFinishDecode() {
-                        System.out.println("finish");
-                    }
-                };
-                videoToFrames.addCallback(callback);
-                try {
-                    videoToFrames.start();
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
+                saveNv21();
+            }
+        });
+        Button buttonSaveI420 = findViewById(R.id.button_save_i420);
+        buttonSaveI420.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveI420();
+            }
+        });
+        Button buttonSaveJpeg = findViewById(R.id.button_save_jpeg);
+        buttonSaveJpeg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveJpeg();
             }
         });
     }
 
+    void saveNv21() {
+        String inputFilePath = getInputFilePath();
+        String outputDirectory = getOutputDirectory();
+        VideoToFrames videoToFrames = new VideoToFrames(inputFilePath);
+        videoToFrames.saveNv21Frames(outputDirectory);
+        videoToFrames.addCallback(mCallbackSaveFrames);
+        try {
+            videoToFrames.start();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
+
+    void saveI420() {
+        String inputFilePath = getInputFilePath();
+        String outputDirectory = getOutputDirectory();
+        VideoToFrames videoToFrames = new VideoToFrames(inputFilePath);
+        videoToFrames.saveI420Frames(outputDirectory);
+        videoToFrames.addCallback(mCallbackSaveFrames);
+        try {
+            videoToFrames.start();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
+
+    void saveJpeg() {
+        String inputFilePath = getInputFilePath();
+        String outputDirectory = getOutputDirectory();
+        VideoToFrames videoToFrames = new VideoToFrames(inputFilePath);
+        videoToFrames.saveJpegFrames(outputDirectory);
+        videoToFrames.addCallback(mCallbackSaveFrames);
+        try {
+            videoToFrames.start();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -79,7 +144,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE})
+    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE})
     void getFilePath(int requestCode) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
@@ -107,5 +172,15 @@ public class MainActivity extends Activity {
             cursor.close();
         }
         return result;
+    }
+
+    private String getInputFilePath() {
+        EditText editTextInputFilePath = findViewById(R.id.file_path_input);
+        return editTextInputFilePath.getText().toString();
+    }
+
+    private String getOutputDirectory() {
+        EditText editTextOutputDirectory = findViewById(R.id.output_directory);
+        return new File(Environment.getExternalStorageDirectory(), editTextOutputDirectory.getText().toString()).getAbsolutePath();
     }
 }
