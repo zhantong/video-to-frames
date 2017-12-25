@@ -79,7 +79,7 @@ public class VideoToFrames implements Runnable {
             extractor.setDataSource(videoFile.toString());
             int trackIndex = selectTrack(extractor);
             if (trackIndex < 0) {
-                throw new RuntimeException("No video track found in " + videoFilePath);
+                throw new IOException("No video track found in " + videoFilePath);
             }
             extractor.selectTrack(trackIndex);
             MediaFormat mediaFormat = extractor.getTrackFormat(trackIndex);
@@ -121,6 +121,48 @@ public class VideoToFrames implements Runnable {
         return -1;
     }
 
+    private static MediaFormat getMediaFormat(String videoFilePath) throws IOException {
+        File videoFile = new File(videoFilePath);
+        MediaExtractor extractor = null;
+        try {
+            extractor = new MediaExtractor();
+            extractor.setDataSource(videoFile.toString());
+            int trackIndex = selectTrack(extractor);
+            if (trackIndex < 0) {
+                throw new IOException("No video track found in " + videoFilePath);
+            }
+            extractor.selectTrack(trackIndex);
+            return extractor.getTrackFormat(trackIndex);
+        } finally {
+            if (extractor != null) {
+                extractor.release();
+                extractor = null;
+            }
+        }
+    }
+
+    public int getVideoWidth() {
+        int width = -1;
+        try {
+            MediaFormat mediaFormat = getMediaFormat(videoFilePath);
+            width = mediaFormat.getInteger(MediaFormat.KEY_WIDTH);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return width;
+    }
+
+    public int getVideoHeight() {
+        int height = -1;
+        try {
+            MediaFormat mediaFormat = getMediaFormat(videoFilePath);
+            height = mediaFormat.getInteger(MediaFormat.KEY_HEIGHT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return height;
+    }
+
     private static boolean isColorFormatSupported(int colorFormat, MediaCodecInfo.CodecCapabilities caps) {
         for (int c : caps.colorFormats) {
             if (c == colorFormat) {
@@ -136,8 +178,6 @@ public class VideoToFrames implements Runnable {
         boolean sawOutputEOS = false;
         decoder.configure(mediaFormat, null, null, 0);
         decoder.start();
-        final int width = mediaFormat.getInteger(MediaFormat.KEY_WIDTH);
-        final int height = mediaFormat.getInteger(MediaFormat.KEY_HEIGHT);
         int outputFrameCount = 0;
         while (!sawOutputEOS && !stopDecode) {
             if (!sawInputEOS) {
